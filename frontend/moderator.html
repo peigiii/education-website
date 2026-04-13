@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Education Website | Moderator UI</title>
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body>
+    <header class="top-nav">
+      <div class="container top-nav-inner">
+        <div class="brand">
+          Education Hub
+          <small>Undergraduate Learning Platform</small>
+        </div>
+        <nav class="nav-links">
+          <a class="nav-link" href="./index.html">Home</a>
+          <a class="nav-link" href="./bookstore.html">Bookstore</a>
+          <a class="nav-link active" href="./moderator.html">Moderator</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="section">
+      <div class="container">
+        <div class="section-heading">
+          <h1>Forum Moderation Console</h1>
+          <p>For moderator/admin accounts: review pending posts, approve/reject, or delete violations.</p>
+        </div>
+
+        <section class="panel card moderator-panel">
+          <div class="toolbar">
+            <label class="sr-only" for="modToken">Moderator token</label>
+            <input id="modToken" type="text" placeholder="Moderator/Admin JWT token" />
+            <button id="loadBtn" class="btn btn-primary">Load pending posts</button>
+          </div>
+          <div class="row moderator-actions">
+            <button id="saveModTokenBtn" class="btn btn-outline">Save token</button>
+            <button id="clearModTokenBtn" class="btn btn-outline">Clear token</button>
+            <button id="approveAllBtn" class="btn btn-success">Approve visible</button>
+            <button id="rejectAllBtn" class="btn btn-outline">Reject visible</button>
+          </div>
+          <p id="modMsg" class="message moderator-message" role="status" aria-live="polite">
+            Load pending posts to begin moderation.
+          </p>
+        </section>
+
+        <section id="postList" class="post-list"></section>
+      </div>
+    </main>
+
+    <script src="./assets/js/config.js"></script>
+    <script src="./assets/js/copy.js"></script>
+    <script src="./assets/js/moderator.js"></script>
+  </body>
+</html>

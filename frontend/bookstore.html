@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Education Website | Bookstore</title>
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body>
+    <header class="top-nav">
+      <div class="container top-nav-inner">
+        <div class="brand">
+          Education Hub
+          <small>Undergraduate Learning Platform</small>
+        </div>
+        <nav class="nav-links">
+          <a class="nav-link" href="./index.html">Home</a>
+          <a class="nav-link active" href="./bookstore.html">Bookstore</a>
+          <a class="nav-link" href="./moderator.html">Moderator</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="section">
+      <div class="container layout-2col">
+        <section>
+          <div class="section-heading">
+            <h1>Academic Bookstore</h1>
+            <p>Search, filter, add to cart, and checkout through the backend API.</p>
+          </div>
+
+          <div class="toolbar">
+            <label class="sr-only" for="searchInput">Search books</label>
+            <input id="searchInput" type="text" placeholder="Search by title or author" />
+            <label class="sr-only" for="categorySelect">Filter by category</label>
+            <select id="categorySelect">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+
+          <p id="bookMeta" class="muted book-meta"></p>
+          <div id="bookGrid" class="book-grid"></div>
+        </section>
+
+        <aside class="panel card cart-panel">
+          <h2 class="cart-heading">Cart</h2>
+          <p class="muted">Use a student token for checkout API.</p>
+          <label class="sr-only" for="tokenInput">Student JWT token</label>
+          <input id="tokenInput" type="text" placeholder="JWT token (optional if saved)" />
+          <div class="row token-actions">
+            <button id="saveTokenBtn" class="btn btn-outline">Save token</button>
+            <button id="clearTokenBtn" class="btn btn-outline">Clear token</button>
+          </div>
+
+          <hr class="cart-divider" />
+
+          <div id="cartList" class="cart-list"></div>
+          <div class="row cart-total-row">
+            <strong>Total:</strong>
+            <strong id="cartTotal">RM 0.00</strong>
+          </div>
+          <button id="checkoutBtn" class="btn btn-primary checkout-btn">
+            Checkout
+          </button>
+          <p id="checkoutMsg" class="message checkout-message" role="status" aria-live="polite">
+            Waiting for checkout action.
+          </p>
+        </aside>
+      </div>
+    </main>
+
+    <script src="./assets/js/config.js"></script>
+    <script src="./assets/js/copy.js"></script>
+    <script src="./assets/js/bookstore.js"></script>
+  </body>
+</html>
