@@ -1,0 +1,332 @@
+openapi: 3.0.3
+info:
+  title: Education Web API
+  version: 1.0.0
+  description: |
+    REST API for this folder (`project grp`). Base URL matches PORT in `.env` (default example: `http://localhost:5001` if Flask uses 5000).
+    Protected routes need header `Authorization: Bearer <token>` from `/api/auth/login` or `/api/auth/register`.
+servers:
+  - url: http://localhost:5001
+    description: Local (see PORT in .env)
+tags:
+  - name: Health
+  - name: Auth
+  - name: CourseResources
+  - name: ForumPosts
+  - name: Books
+  - name: Orders
+paths:
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Liveness / version hint for frontend and DevOps
+      responses:
+        '200':
+          description: OK
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register user (password stored as hash)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 6 }
+      responses:
+        '201': { description: Created }
+        '409': { description: Duplicate username/email }
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200': { description: Returns token + user }
+        '401': { description: Invalid credentials }
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      security: [{ bearerAuth: [] }]
+      summary: Current user with populated saved_resources
+      responses:
+        '200': { description: OK }
+        '401': { description: Unauthorized }
+  /api/course-resources:
+    get:
+      tags: [CourseResources]
+      responses:
+        '200': { description: List }
+    post:
+      tags: [CourseResources]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseResourceInput'
+      responses:
+        '201': { description: Created }
+  /api/course-resources/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [CourseResources]
+      responses:
+        '200': { description: One resource }
+        '404': { description: Not found }
+    put:
+      tags: [CourseResources]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseResourceInputPartial'
+      responses:
+        '200': { description: Updated }
+    delete:
+      tags: [CourseResources]
+      responses:
+        '200': { description: Deleted }
+  /api/course-resources/{id}/save:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [CourseResources]
+      security: [{ bearerAuth: [] }]
+      summary: Add resource to current user's saved_resources
+      responses:
+        '200': { description: Updated user }
+    delete:
+      tags: [CourseResources]
+      security: [{ bearerAuth: [] }]
+      summary: Remove from saved_resources
+      responses:
+        '200': { description: Updated user }
+  /api/forum-posts:
+    get:
+      tags: [ForumPosts]
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected]
+      responses:
+        '200': { description: List with user_id populated }
+    post:
+      tags: [ForumPosts]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, content]
+              properties:
+                title: { type: string }
+                content: { type: string }
+                status:
+                  type: string
+                  description: Only moderator/admin may set on create
+      responses:
+        '201': { description: Created }
+  /api/forum-posts/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [ForumPosts]
+      responses:
+        '200': { description: OK }
+    put:
+      tags: [ForumPosts]
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [ForumPosts]
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Deleted }
+  /api/forum-posts/{id}/moderate:
+    patch:
+      tags: [ForumPosts]
+      security: [{ bearerAuth: [] }]
+      summary: Set status (moderator or admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [pending, approved, rejected]
+      responses:
+        '200': { description: OK }
+        '403': { description: Forbidden }
+  /api/books:
+    get:
+      tags: [Books]
+      responses:
+        '200': { description: List }
+    post:
+      tags: [Books]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookInput'
+      responses:
+        '201': { description: Created }
+  /api/books/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Books]
+      responses:
+        '200': { description: OK }
+    put:
+      tags: [Books]
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [Books]
+      responses:
+        '200': { description: Deleted }
+  /api/orders:
+    get:
+      tags: [Orders]
+      security: [{ bearerAuth: [] }]
+      summary: Own orders; moderator/admin see all
+      responses:
+        '200': { description: List }
+    post:
+      tags: [Orders]
+      security: [{ bearerAuth: [] }]
+      summary: Place order; decrements book stock in a transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items]
+              properties:
+                status:
+                  type: string
+                  enum: [pending, completed, cancelled]
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required: [book_id, quantity]
+                    properties:
+                      book_id: { type: string }
+                      quantity: { type: integer, minimum: 1 }
+      responses:
+        '201': { description: Created }
+        '400': { description: Stock or validation error }
+  /api/orders/{id}:
+    get:
+      tags: [Orders]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+        '403': { description: Not your order }
+  /api/orders/{id}/status:
+    patch:
+      tags: [Orders]
+      security: [{ bearerAuth: [] }]
+      summary: moderator/admin only
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [pending, completed, cancelled]
+      responses:
+        '200': { description: OK }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CourseResourceInput:
+      type: object
+      required: [subject, module_title, resource_type, title]
+      properties:
+        subject: { type: string }
+        module_title: { type: string }
+        resource_type:
+          type: string
+          enum: [lecture_note, video_tutorial, interactive_quiz]
+        title: { type: string }
+        content_url: { type: string, nullable: true }
+    CourseResourceInputPartial:
+      type: object
+      properties:
+        subject: { type: string }
+        module_title: { type: string }
+        resource_type:
+          type: string
+          enum: [lecture_note, video_tutorial, interactive_quiz]
+        title: { type: string }
+        content_url: { type: string, nullable: true }
+    BookInput:
+      type: object
+      required: [title, author, category, price]
+      properties:
+        title: { type: string }
+        author: { type: string }
+        category: { type: string }
+        price: { type: number, minimum: 0 }
+        stock_quantity: { type: integer, minimum: 0, default: 0 }
